@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Types.fs" />
+    <Compile Include="JrExample.fs" />
+    <Compile Include="SimpleFree2.fs" />
+    <Compile Include="SimpleFree.fs" />
+    <Compile Include="SimpleFreeAndHttp.fs" />
+    <Compile Include="MailBoxTest.fs" />
+    <Compile Include="WebAdt.fs" />
+    <Compile Include="GenericExperements.fs" />
+    <Compile Include="DuckTyping.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+</Project>
