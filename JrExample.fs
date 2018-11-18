@@ -39,38 +39,32 @@ module Free =
 
 let apiRequest (f: Replay<'x> -> ApiRequest): FaceProgram<'x> = failwith "TODO"
 
-let common url f =
+let requestWithParse siteUrl f =
     Free.free { 
-        let uri = Uri url
+        let uri = Uri siteUrl
         let! html = Free(HtmlRequest(uri, Pure))
-        let! profile = apiRequest (fun x -> f (html, x))
-        printfn "Profile = %O" profile
-        return profile
+        let! response = apiRequest (fun x -> f (html, x))
+        printfn "Response = %O" response
+        return response
+    }
+
+let requestWithParse' _ f =
+    Free.free { 
+        let fr = f ("", fun _-> ())
+        let url = 
+            match fr with
+            | TagListRequest _ -> "TODO"
+            | _ -> "TODO"
+        return requestWithParse url f
     }
 
 let test =
     Free.free { 
-        let uri = Uri "http://joyreactor.cc/user/_y2k"
-        let! html = Free(HtmlRequest(uri, Pure))
-        let! profile = apiRequest (fun x -> ProfileRequest(html, x))
-        printfn "Profile = %O" profile
-        return profile
-    }
-let test' =
-    Free.free { 
-        let uri = Uri "http://joyreactor.cc/"
-        let! html = Free(HtmlRequest(uri, Pure))
-        let! tags = apiRequest (fun x -> TagListRequest(html, x))
-        printfn "Tags = %O" tags
-        return tags
-    }
-let test'' =
-    Free.free { 
-        let! x = common "http://joyreactor.cc/user/_y2k" ProfileRequest
-        return x
-    }
-let test''' =
-    Free.free { 
-        let! x = common "http://joyreactor.cc/" TagListRequest
-        return x
+        let! x1 = requestWithParse "http://joyreactor.cc/user/_y2k" ProfileRequest
+        printfn "Profile %O %O" x1.userImage x1.rating
+
+        let! x2 = requestWithParse "http://joyreactor.cc/" TagListRequest
+        printfn "Tags %O" x2.Length
+
+        return ()
     }
