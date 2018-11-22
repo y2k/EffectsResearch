@@ -5,11 +5,13 @@ open Types
 
 type Replay<'x> = 'x -> unit
 
+type Html = string
+
 type ApiRequest =
-    | TagListRequest of string * (Tag list -> unit)
-    | ProfileRequest of string * (Profile -> unit)
-    | PostRequest of string * (Post -> unit)
-    | PostsRequest of string * (PostResponse -> unit)
+    | TagListRequest of Html * Replay<Tag list>
+    | ProfileRequest of Html * Replay<Profile>
+    | PostRequest of Html * Replay<Post>
+    | PostsRequest of Html * Replay<PostResponse>
 
 type FreeInstruction<'a> =
     | HtmlRequest of Uri * (string -> 'a)
@@ -49,15 +51,13 @@ let requestWithParse siteUrl f =
     }
 
 let requestWithParse' _ f =
-    Free.free {
-        let fr = f ("", fun _ -> ())
+    let fr = f ("", ignore)
 
-        let url =
-            match fr with
-            | TagListRequest _ -> "TODO"
-            | _ -> "TODO"
-        return requestWithParse url f
-    }
+    let url =
+        match fr with
+        | TagListRequest _ -> "TODO"
+        | _ -> "TODO"
+    requestWithParse url f
 
 let test =
     Free.free {
