@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Effects.fs"/>
+    <Compile Include="EffectsReactNative.fs"/>
     <Compile Include="EffectsTestPage.fs"/>
     <Compile Include="Tests.fs"/>
     <Compile Include="Program.fs"/>
