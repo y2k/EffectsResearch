@@ -1,12 +1,12 @@
 module Effects.Tests
 
-module Effect = Effects.Core
+open Effects.Core
 
 [<AutoOpen>]
 module Utils =
     open Effects.Core
     open Fabulous.Core
-    
+
     let getBlocked f =
         let mutable actual = None
         f (fun newMsg ->
@@ -14,7 +14,7 @@ module Utils =
         Option.get actual
 
     let runBlocked cmd f =
-        Effect.runTest f
+        Eff.runTest f
         getBlocked (fun f -> Cmd.dispatch f cmd)
 
 open Effects.Core
@@ -23,11 +23,11 @@ open Fabulous.Core
 open System
 open Xunit
 
-[<Fact>]
+[<Fact(Timeout = 1000)>]
 let ``Test page init``() =
     let (model, cmd) = Page.init()
-    let actual = runBlocked 
-                    cmd 
+    let actual = runBlocked
+                    cmd
                     (fun (Effects.DownloadString(arg, f)) ->
                         Assert.Equal(Uri "https://google.com/#", arg)
                         f "[{\"Code\":\"Code\"}]")

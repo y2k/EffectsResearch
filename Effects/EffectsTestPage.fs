@@ -1,10 +1,9 @@
 module Effects.EffectsTestPage
 
+open Effects.Core
 open Fabulous.Core
 open System
 open System.Net
-
-module Effect = Effects.Core
 
 [<AutoOpen>]
 module Utils =
@@ -31,12 +30,13 @@ module Cmd =
             let! b = a
             return f b
         } |> Cmd.ofAsyncMsg
+    let ofEffect (Eff a) f = ofAsync a f
 
 module Effects =
     type DownloadString = DownloadString of Uri * (string -> unit)
     let downloadFromWeb (uri : Uri) =
         async { return! (new WebClient()).DownloadStringTaskAsync uri |> Async.AwaitTask }
-        |> Effect.wrap (curry DownloadString uri)
+        |> Eff.wrap (curry DownloadString uri)
 
 module Services =
     open FSharp.Data
@@ -48,18 +48,18 @@ module Services =
 
     let private key = ""
 
-    let loadCountries : CountryProvider array Async =
+    let loadCountries =
         sprintf "https://google.com/#%s" key |> Uri
         |> Effects.downloadFromWeb
-        >>- JsonConvert.DeserializeObject<CountryProvider array>
-    let loadStates country : StateProvider array Async =
+        <*> JsonConvert.DeserializeObject<CountryProvider array>
+    let loadStates country =
         sprintf "https://.google.com/#%s-%s" country key |> Uri
         |> Effects.downloadFromWeb
-        >>- JsonConvert.DeserializeObject<StateProvider array>
-    let loadCities country state : CityProvider array Async =
+        <*> JsonConvert.DeserializeObject<StateProvider array>
+    let loadCities country state =
         sprintf "https://google.com/#%s-%s-%s" country state key |> Uri
         |> Effects.downloadFromWeb
-        >>- JsonConvert.DeserializeObject<CityProvider array>
+        <*> JsonConvert.DeserializeObject<CityProvider array>
 
 module Page =
     type Model =
@@ -84,7 +84,7 @@ module Page =
           selectedCountry = None; selectedState = None; selectedCity = None
           isLoading = true }
 
-    let init() = initModel, Cmd.ofAsync Services.loadCountries CountriesLoaded
+    let init() = initModel, Cmd.ofEffect Services.loadCountries CountriesLoaded
 
     let update msg model =
         match msg with
@@ -100,13 +100,13 @@ module Page =
                              isLoading = true
                              states = [||]
                              cities = [||] },
-                Cmd.ofAsync (Services.loadStates (model.countries.[id].Code)) StatesLoaded
+                Cmd.ofEffect (Services.loadStates (model.countries.[id].Code)) StatesLoaded
             | State ->
                 { model with selectedState = Some id
                              selectedCity = None
                              isLoading = true
                              cities = [||] },
-                Cmd.ofAsync
+                Cmd.ofEffect
                     (Services.loadCities (model.countries.[model.selectedCountry.Value].Code) model.states.[id].Region)
                     CitiesLoaded
             | City -> { model with selectedCity = Some id }, Cmd.none
