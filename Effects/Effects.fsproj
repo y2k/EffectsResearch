@@ -5,6 +5,7 @@
     <GenerateProgramFile>false</GenerateProgramFile>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Example1.fs"/>
     <Compile Include="Effects.fs"/>
     <Compile Include="EffectsReactNative.fs"/>
     <Compile Include="EffectsTestPage.fs"/>
